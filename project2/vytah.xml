@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>clock x;</declaration>
+	<template>
+		<name x="5" y="5">vytah</name>
+		<declaration>// Place local declarations here.</declaration>
+		<location id="id0" x="-272" y="323">
+			<name x="-374" y="314">poschodi_1</name>
+		</location>
+		<location id="id1" x="8" y="323">
+			<name x="0" y="289">jizda_do_1</name>
+			<label kind="invariant" x="-2" y="340">x&lt;5</label>
+		</location>
+		<location id="id2" x="-272" y="0">
+			<name x="-374" y="-8">poschodi_3</name>
+		</location>
+		<location id="id3" x="-272" y="153">
+			<name x="-374" y="144">poschodi_2</name>
+		</location>
+		<location id="id4" x="8" y="153">
+			<name x="-2" y="119">jizda_do_2</name>
+			<label kind="invariant" x="-2" y="170">x&lt;5</label>
+		</location>
+		<location id="id5" x="8" y="0">
+			<name x="-2" y="-34">jizda_do_3</name>
+			<label kind="invariant" x="-2" y="17">x&lt;5</label>
+		</location>
+		<location id="id6" x="263" y="323">
+			<name x="253" y="289">Porucha</name>
+			<label kind="invariant" x="272" y="331">x&lt;=20</label>
+		</location>
+		<location id="id7" x="263" y="433">
+			<name x="212" y="408">Alarm</name>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id0"/>
+			<nail x="17" y="408"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="272" y="374">x==20</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id0"/>
+			<label kind="guard" x="76" y="365">5&lt;x and x&lt;10</label>
+			<nail x="17" y="374"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id6"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id6"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-178" y="306">3&lt;x and x&lt;5</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-178" y="-25">3&lt;x and x&lt;5</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-229" y="136">3&lt;x and x&lt;5</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="assignment" x="-246" y="187">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-246" y="102">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="assignment" x="-272" y="42">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="-187" y="25">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-255" y="246">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="-195" y="280">x:=0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+//Process = Template();
+// List one or more processes to be composed into a system.
+system vytah;
+    </system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; vytah.poschodi_1</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] vytah.Alarm imply (x&gt;=20)</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
