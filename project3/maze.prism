@@ -1,0 +1,143 @@
+// MBA -- 3. project -- stochastic modelling
+
+dtmc
+
+// maze structure
+
+// 3 | x x x x x
+// 2 | x   x   x
+// 1 | x   x   x
+// 0 | x   x   x
+// y ____________
+//   x 0 1 2 3 4
+
+// whether moving in this direction is possible
+formula u = y<3;
+formula r = y=3 & x<4;
+formula d = y>0 & (x=0 | x=2 | x=4);
+formula l = y=3 & x>0;
+
+// updates of coordinates (if possible)
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
+// encoding four directions
+const int up = 0;
+const int right = 1;
+const int down = 2;
+const int left = 3;
+
+
+module clk    // synchronization
+  
+  // 0 - place, 1 - steer, 2 - drive
+  clk : [0..2] init 0;
+
+  // random placement
+  [place] clk=0 -> (clk'=1);
+  
+  // switch between steering and driving
+  [steer] clk=1 -> (clk'=2);
+  [drive] clk=2 -> (clk'=1);
+
+endmodule
+
+
+module maze    // maze movement
+
+  // coordinates
+  x : [-1..4] init -1;
+  y : [-1..3] init -1;
+
+  // random placement
+  [place] true -> 
+    1/12 :    (x'=0)&(y'=1)
+  + 1/12 :    (x'=0)&(y'=2)
+  + 1/12 :    (x'=0)&(y'=3)
+  + 1/12 :    (x'=1)&(y'=3)
+  + 1/12 :    (x'=2)&(y'=1)
+  + 1/12 :    (x'=2)&(y'=2)
+  + 1/12 :    (x'=2)&(y'=3)
+  + 1/12 :    (x'=3)&(y'=3)
+  + 1/12 :    (x'=4)&(y'=0)
+  + 1/12 :    (x'=4)&(y'=1)
+  + 1/12 :    (x'=4)&(y'=2)
+  + 1/12 :    (x'=4)&(y'=3);
+    
+  // place deterministically (debug only)
+  //[place] true -> (x'=2)&(y'=2);
+
+  // moving around the maze
+  [drive] dir=up    -> 0.9: (y'=yu) + 0.1: (x'=xr);
+  [drive] dir=right -> 0.9: (x'=xr) + 0.1: (y'=yd);
+  [drive] dir=down  -> 0.9: (y'=yd) + 0.1: (x'=xl);
+  [drive] dir=left  -> 0.9: (x'=xl) + 0.1: (y'=yu);
+	
+endmodule
+
+// TODO your own formulae (cannot refer to variables x&y)
+
+// maze places
+formula green 	= (!l & !r & u & d);
+formula yellow 	= (!l & !r & u & !d);
+formula blue 	= (l & r & !u & !d);
+formula red 	= (!l & r & !u & d);
+formula purple 	= (l & !r & !u & d);
+formula orange 	= (l & r & !u & d);
+
+//formula goal = (x=2 & y=0);
+//formula bad = (x=0 & y=0);
+
+module controller // steering
+  dir: [0..3]; // current movement direction: 0 = up, 1 = right, 2 = down, 3 = left
+  goDown:[0..1] init 0;
+  fromRed:[0..1] init 0;
+
+  // green
+  // robot is in correct column -> go down
+  [steer] green & goDown=1 -> (dir'=down);
+  
+  // green or yellow -> go up
+  [steer] green & goDown=0 -> (dir'=up);
+  [steer] yellow -> (dir'=up);
+
+  // blue
+  // from red side -> go right
+  [steer] blue & goDown=0 & fromRed=1 -> (dir'=right);
+  // from purple side or side unknown -> go left
+  [steer] blue & goDown=0 & fromRed=0 -> (dir'=left);
+  // failed move from orange
+  [steer] blue & goDown=1 -> (dir'=right);
+
+  // red
+  [steer] red -> (dir'=right) & (fromRed'=1);
+
+  // purple
+  [steer] purple -> (dir'=left);
+
+  // orange
+  // set flag: orange place has been reached
+  [steer] orange -> (dir'=down) & (goDown'=1);
+
+  // ************************** example stragegies **************************
+  //mem:[0..1] init 0;
+
+  // example stragegy 1:
+  // move only down
+  //[steer] true -> (dir'=down);
+
+  // example strategy 2:
+  // move up while possible, then set the memory flag and move only right
+  //[steer] mem=0 & u -> (dir'=up);
+  //[steer] mem=0 & !u -> (dir'=right) & (mem'=1);
+  //[steer] mem=1 -> (dir'=right);
+
+endmodule
+
+// counting each step
+rewards "steps"
+    clk=2: 1;
+endrewards
+

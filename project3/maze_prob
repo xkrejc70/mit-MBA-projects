@@ -1,0 +1,13 @@
+const double a;
+const int b;
+
+P>=a [ F (x=2 & y=0) ]
+
+P=? [ F (x=2 & y=0) ]
+
+R{"steps"}=? [ F (x=2 & y=0) ]
+
+R{"steps"}<=b [ F (x=2 & y=0) ]
+
+P=? [ F (x=2 & y=0) & !(x=0 & y=0) ]
+
